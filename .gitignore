@@ -1,0 +1,22 @@
+# Binaries
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/api
+
+# Test & coverage
+*.test
+*.out
+coverage.html
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+
+# Env
+.env
+.env.local
