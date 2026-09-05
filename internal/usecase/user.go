@@ -11,6 +11,11 @@ import (
 	"golang-rest-api/internal/domain"
 )
 
+const (
+	defaultLimit = 20
+	maxLimit     = 100
+)
+
 type UserUseCase struct {
 	repo domain.UserRepository
 	now  func() time.Time

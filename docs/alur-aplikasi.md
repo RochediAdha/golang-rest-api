@@ -13,9 +13,12 @@ Urutan di `cmd/api/main.go`:
 3. Connection pool PostgreSQL dibuka (`database.Open`). Kalau gagal, proses berhenti.
 4. Migrasi dijalankan (`database.Migrate`). File SQL yang belum ada di `schema_migrations` dieksekusi, lalu dicatat.
 5. Repository PostgreSQL dibuat, lalu diikat ke usecase:
-   - `BookUseCase`
    - `UserUseCase`
    - `RoleUseCase`
+   - `MenuUseCase`
+   - `UserRoleUseCase`
+   - `PrivilegeUseCase`
+   - `RolePrivilegeUseCase`
 6. Router HTTP dipasang (`adapter/http`). Pool dipakai juga untuk `GET /health`.
 7. Server listen di `ADDR` (default `:8080`).
 8. Proses menunggu `SIGINT` / `SIGTERM`. Saat berhenti, `Shutdown` dipanggil lalu pool ditutup.
@@ -68,10 +71,12 @@ Semua modul CRUD mengikuti pola yang sama. Perbedaan ada di aturan bisnis.
 
 | Modul | Path | Catatan |
 | --- | --- | --- |
-| Books | `/api/v1/books` | ID hex; ISBN unik |
 | Users | `/api/v1/users` | ID UUID; username dan email unik |
 | Roles | `/api/v1/roles` | ID UUID; nama unik; delete adalah soft delete |
 | Menus | `/api/v1/menus` | ID UUID; `code` unik; `parentId` opsional; delete adalah soft delete |
+| User roles | `/api/v1/user-roles` | ID UUID; pasangan `userId`+`roleId` unik; `number` untuk join dosen/mahasiswa; delete permanen |
+| Privileges | `/api/v1/privileges` | ID UUID; `code` unik; delete permanen |
+| Role privileges | `/api/v1/role-privileges` | ID UUID; kombinasi role+menu+privilege unik; delete permanen |
 
 Soft delete role:
 
@@ -99,8 +104,8 @@ Tidak otomatis. Admin memilih file yang dijalankan:
 
 ```bash
 go run ./cmd/seed roles
-go run ./cmd/seed books
 go run ./cmd/seed menus
+go run ./cmd/seed privileges
 ```
 
 Alur `cmd/seed`:

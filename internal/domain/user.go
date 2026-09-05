@@ -29,3 +29,9 @@ type UpdateUserInput struct {
 	IsActive  *bool   `json:"isActive"`
 	UpdatedBy *string `json:"updatedBy"`
 }
+
+type ListFilter struct {
+	Query  string
+	Limit  int
+	Offset int
+}

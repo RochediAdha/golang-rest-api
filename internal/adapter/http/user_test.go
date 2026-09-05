@@ -6,13 +6,10 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"golang-rest-api/internal/adapter/memory"
-	"golang-rest-api/internal/usecase"
 )
 
 func TestUserAPI(t *testing.T) {
-	handler := NewRouter(usecase.NewBookUseCase(memory.NewBookRepository()), usecase.NewUserUseCase(memory.NewUserRepository()), usecase.NewRoleUseCase(memory.NewRoleRepository()), usecase.NewMenuUseCase(memory.NewMenuRepository()), nil)
+	handler := testRouter()
 
 	createReq := httptest.NewRequest(http.MethodPost, "/api/v1/users", strings.NewReader(`{"username":"rochedi","email":"rochedi@example.com","name":"Rochedi Adha"}`))
 	createReq.Header.Set("Content-Type", "application/json")

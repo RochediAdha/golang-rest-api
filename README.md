@@ -1,6 +1,6 @@
 # Golang REST API
 
-REST API untuk manajemen buku, user, role, dan menu. Dibangun dengan Go standard library (`net/http`) dan PostgreSQL, mengikuti Clean Architecture.
+REST API untuk manajemen user, role, menu, privilege, dan otorisasi. Dibangun dengan Go standard library (`net/http`) dan PostgreSQL, mengikuti Clean Architecture.
 
 Dokumentasi lengkap ada di folder [`docs/`](docs/README.md):
 
@@ -58,23 +58,18 @@ Seeder tidak jalan otomatis saat server start. Admin menjalankan per file:
 
 ```bash
 go run ./cmd/seed roles
-go run ./cmd/seed books
 go run ./cmd/seed menus
+go run ./cmd/seed privileges
 ```
 
 atau `make seed name=roles`. Data yang sudah ada dilewati (tidak diduplikasi).
 
 ## Endpoint
 
-# Books
+# Health
 | Method | Path | Deskripsi |
 | --- | --- | --- |
 | `GET` | `/health` | Health check (termasuk ping database) |
-| `GET` | `/api/v1/books` | Daftar buku (`q`, `limit`, `offset`) |
-| `GET` | `/api/v1/books/{id}` | Detail buku |
-| `POST` | `/api/v1/books` | Tambah buku |
-| `PUT` | `/api/v1/books/{id}` | Ubah buku |
-| `DELETE` | `/api/v1/books/{id}` | Hapus buku |
 
 # Users
 | Method | Path | Deskripsi |
@@ -102,6 +97,31 @@ atau `make seed name=roles`. Data yang sudah ada dilewati (tidak diduplikasi).
 | `POST` | `/api/v1/menus` | Tambah menu |
 | `PUT` | `/api/v1/menus/{id}` | Ubah menu |
 | `DELETE` | `/api/v1/menus/{id}` | Soft delete menu |
+
+# User roles
+| Method | Path | Deskripsi |
+| --- | --- | --- |
+| `GET` | `/api/v1/user-roles` | Daftar penugasan (`userId`, `roleId`, `number`, `limit`, `offset`) |
+| `GET` | `/api/v1/user-roles/{id}` | Detail penugasan |
+| `POST` | `/api/v1/user-roles` | Tugaskan role ke user |
+| `DELETE` | `/api/v1/user-roles/{id}` | Hapus penugasan |
+
+# Privileges
+| Method | Path | Deskripsi |
+| --- | --- | --- |
+| `GET` | `/api/v1/privileges` | Daftar privilege (`q`, `limit`, `offset`) |
+| `GET` | `/api/v1/privileges/{id}` | Detail privilege |
+| `POST` | `/api/v1/privileges` | Tambah privilege |
+| `PUT` | `/api/v1/privileges/{id}` | Ubah privilege |
+| `DELETE` | `/api/v1/privileges/{id}` | Hapus privilege |
+
+# Role privileges
+| Method | Path | Deskripsi |
+| --- | --- | --- |
+| `GET` | `/api/v1/role-privileges` | Daftar otorisasi (`roleId`, `menuId`, `privilegeId`, `limit`, `offset`) |
+| `GET` | `/api/v1/role-privileges/{id}` | Detail otorisasi |
+| `POST` | `/api/v1/role-privileges` | Tugaskan privilege ke role pada menu |
+| `DELETE` | `/api/v1/role-privileges/{id}` | Hapus otorisasi |
 
 ## Tes
 

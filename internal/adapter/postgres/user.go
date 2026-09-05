@@ -174,4 +174,15 @@ func nullUUID(v *string) any {
 	return *v
 }
 
+func nullString(v string) any {
+	if v == "" {
+		return nil
+	}
+	return v
+}
+
+type rowScanner interface {
+	Scan(dest ...any) error
+}
+
 var _ domain.UserRepository = (*UserRepository)(nil)

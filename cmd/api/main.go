@@ -36,14 +36,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	bookUC := usecase.NewBookUseCase(postgres.NewBookRepository(pool))
-	userUC := usecase.NewUserUseCase(postgres.NewUserRepository(pool))
-	roleUC := usecase.NewRoleUseCase(postgres.NewRoleRepository(pool))
-	menuUC := usecase.NewMenuUseCase(postgres.NewMenuRepository(pool))
+	userRepo := postgres.NewUserRepository(pool)
+	roleRepo := postgres.NewRoleRepository(pool)
+	menuRepo := postgres.NewMenuRepository(pool)
+	privilegeRepo := postgres.NewPrivilegeRepository(pool)
+	userUC := usecase.NewUserUseCase(userRepo)
+	roleUC := usecase.NewRoleUseCase(roleRepo)
+	menuUC := usecase.NewMenuUseCase(menuRepo)
+	userRoleUC := usecase.NewUserRoleUseCase(postgres.NewUserRoleRepository(pool), userRepo, roleRepo)
+	privilegeUC := usecase.NewPrivilegeUseCase(privilegeRepo)
+	rolePrivilegeUC := usecase.NewRolePrivilegeUseCase(postgres.NewRolePrivilegeRepository(pool), roleRepo, menuRepo, privilegeRepo)
 
 	server := &http.Server{
 		Addr:         cfg.Addr,
-		Handler:      httpadapter.NewRouter(bookUC, userUC, roleUC, menuUC, pool),
+		Handler:      httpadapter.NewRouter(userUC, roleUC, menuUC, userRoleUC, privilegeUC, rolePrivilegeUC, pool),
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
 	}

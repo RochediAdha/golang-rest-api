@@ -8,10 +8,10 @@ import (
 	"testing"
 )
 
-func TestMenuAPI(t *testing.T) {
+func TestPrivilegeAPI(t *testing.T) {
 	handler := testRouter()
 
-	createReq := httptest.NewRequest(http.MethodPost, "/api/v1/menus", strings.NewReader(`{"code":"dashboard","name":"Dashboard","path":"/dashboard","icon":"home"}`))
+	createReq := httptest.NewRequest(http.MethodPost, "/api/v1/privileges", strings.NewReader(`{"code":"user.read","name":"Read User","description":"View user data"}`))
 	createReq.Header.Set("Content-Type", "application/json")
 	createRec := httptest.NewRecorder()
 	handler.ServeHTTP(createRec, createReq)
@@ -24,26 +24,23 @@ func TestMenuAPI(t *testing.T) {
 		t.Fatalf("decode create: %v", err)
 	}
 	id, _ := created["id"].(string)
-	if id == "" {
-		t.Fatal("missing id")
-	}
-	if created["type"] != "ITEM" {
-		t.Fatalf("expected default type ITEM, got %v", created["type"])
+	if id == "" || created["code"] != "user.read" {
+		t.Fatalf("unexpected create body: %s", createRec.Body.String())
 	}
 
 	getRec := httptest.NewRecorder()
-	handler.ServeHTTP(getRec, httptest.NewRequest(http.MethodGet, "/api/v1/menus/"+id, nil))
+	handler.ServeHTTP(getRec, httptest.NewRequest(http.MethodGet, "/api/v1/privileges/"+id, nil))
 	if getRec.Code != http.StatusOK {
 		t.Fatalf("get status = %d", getRec.Code)
 	}
 
 	listRec := httptest.NewRecorder()
-	handler.ServeHTTP(listRec, httptest.NewRequest(http.MethodGet, "/api/v1/menus?parentId=root", nil))
+	handler.ServeHTTP(listRec, httptest.NewRequest(http.MethodGet, "/api/v1/privileges?q=user.read", nil))
 	if listRec.Code != http.StatusOK {
 		t.Fatalf("list status = %d", listRec.Code)
 	}
 
-	updateReq := httptest.NewRequest(http.MethodPut, "/api/v1/menus/"+id, strings.NewReader(`{"code":"dashboard","name":"Home","path":"/home","sortOrder":1}`))
+	updateReq := httptest.NewRequest(http.MethodPut, "/api/v1/privileges/"+id, strings.NewReader(`{"code":"user.read","name":"Read Users","description":"View users","isActive":false}`))
 	updateReq.Header.Set("Content-Type", "application/json")
 	updateRec := httptest.NewRecorder()
 	handler.ServeHTTP(updateRec, updateReq)
@@ -52,15 +49,14 @@ func TestMenuAPI(t *testing.T) {
 	}
 
 	deleteRec := httptest.NewRecorder()
-	handler.ServeHTTP(deleteRec, httptest.NewRequest(http.MethodDelete, "/api/v1/menus/"+id, nil))
-	if deleteRec.Code != http.StatusOK {
+	handler.ServeHTTP(deleteRec, httptest.NewRequest(http.MethodDelete, "/api/v1/privileges/"+id, nil))
+	if deleteRec.Code != http.StatusNoContent {
 		t.Fatalf("delete status = %d body=%s", deleteRec.Code, deleteRec.Body.String())
 	}
-	var deleted map[string]any
-	if err := json.Unmarshal(deleteRec.Body.Bytes(), &deleted); err != nil {
-		t.Fatalf("decode delete: %v", err)
-	}
-	if deleted["deletedAt"] == nil {
-		t.Fatalf("expected deletedAt: %s", deleteRec.Body.String())
+
+	missingRec := httptest.NewRecorder()
+	handler.ServeHTTP(missingRec, httptest.NewRequest(http.MethodGet, "/api/v1/privileges/"+id, nil))
+	if missingRec.Code != http.StatusNotFound {
+		t.Fatalf("missing status = %d", missingRec.Code)
 	}
 }

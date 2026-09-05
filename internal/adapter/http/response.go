@@ -29,6 +29,12 @@ type listResponse[T any] struct {
 	Meta listMeta `json:"meta"`
 }
 
+func decodeJSON(r *http.Request, dst any) error {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	return dec.Decode(dst)
+}
+
 func writeJSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
@@ -51,11 +57,6 @@ func writeError(w http.ResponseWriter, err error) {
 		writeJSON(w, http.StatusNotFound, errorResponse{Error: errorBody{
 			Code:    "not_found",
 			Message: "resource not found",
-		}})
-	case errors.Is(err, domain.ErrDuplicateISBN):
-		writeJSON(w, http.StatusConflict, errorResponse{Error: errorBody{
-			Code:    "duplicate_isbn",
-			Message: "a book with this isbn already exists",
 		}})
 	case errors.Is(err, domain.ErrDuplicateUsername):
 		writeJSON(w, http.StatusConflict, errorResponse{Error: errorBody{
@@ -86,6 +87,46 @@ func writeError(w http.ResponseWriter, err error) {
 		writeJSON(w, http.StatusConflict, errorResponse{Error: errorBody{
 			Code:    "menu_has_children",
 			Message: "menu still has child menus",
+		}})
+	case errors.Is(err, domain.ErrInvalidUser):
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: errorBody{
+			Code:    "invalid_user",
+			Message: "user is invalid",
+		}})
+	case errors.Is(err, domain.ErrInvalidRole):
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: errorBody{
+			Code:    "invalid_role",
+			Message: "role is invalid",
+		}})
+	case errors.Is(err, domain.ErrDuplicateUserRole):
+		writeJSON(w, http.StatusConflict, errorResponse{Error: errorBody{
+			Code:    "duplicate_user_role",
+			Message: "this user already has this role",
+		}})
+	case errors.Is(err, domain.ErrDuplicateUserRoleNumber):
+		writeJSON(w, http.StatusConflict, errorResponse{Error: errorBody{
+			Code:    "duplicate_user_role_number",
+			Message: "this number is already used for this role",
+		}})
+	case errors.Is(err, domain.ErrDuplicatePrivilegeCode):
+		writeJSON(w, http.StatusConflict, errorResponse{Error: errorBody{
+			Code:    "duplicate_privilege_code",
+			Message: "a privilege with this code already exists",
+		}})
+	case errors.Is(err, domain.ErrInvalidMenu):
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: errorBody{
+			Code:    "invalid_menu",
+			Message: "menu is invalid",
+		}})
+	case errors.Is(err, domain.ErrInvalidPrivilege):
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: errorBody{
+			Code:    "invalid_privilege",
+			Message: "privilege is invalid",
+		}})
+	case errors.Is(err, domain.ErrDuplicateRolePrivilege):
+		writeJSON(w, http.StatusConflict, errorResponse{Error: errorBody{
+			Code:    "duplicate_role_privilege",
+			Message: "this role already has this privilege on this menu",
 		}})
 	default:
 		slog.Error("unhandled error", "err", err)

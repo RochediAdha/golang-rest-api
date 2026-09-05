@@ -38,7 +38,6 @@ Informasi singkat API.
   "version": "v1",
   "docs": {
     "health": "GET /health",
-    "books": "GET /api/v1/books",
     "users": "GET /api/v1/users",
     "roles": "GET /api/v1/roles",
     "menus": "GET /api/v1/menus"

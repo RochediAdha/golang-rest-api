@@ -45,7 +45,7 @@ Menjalankan satu file seeder secara manual.
 
 | File | Fungsi |
 | --- | --- |
-| `main.go` | Menerima nama seeder (`roles`, `books`, atau `menus`), konek database, lalu memanggil fungsi di `internal/infrastructure/seeder`. |
+| `main.go` | Menerima nama seeder (`roles`, `menus`, atau `privileges`), konek database, lalu memanggil fungsi di `internal/infrastructure/seeder`. |
 
 ## `internal/`
 
@@ -57,12 +57,14 @@ Lapisan terdalam: entitas, error, dan kontrak penyimpanan (port). Tidak tahu HTT
 
 | File | Fungsi |
 | --- | --- |
-| `book.go` | Entitas `Book` dan input create/update |
 | `user.go` | Entitas `User` dan input create/update |
 | `role.go` | Entitas `Role` dan input create/update/delete |
 | `menu.go` | Entitas `Menu` dan input create/update/delete |
+| `user_role.go` | Entitas `UserRole` dan input create |
+| `privilege.go` | Entitas `Privilege` dan input create/update |
+| `role_privilege.go` | Entitas `RolePrivilege` dan input create |
 | `errors.go` | Error domain (`ErrNotFound`, `ErrInvalidInput`, duplikat, dll.) |
-| `repository.go` | Interface `BookRepository`, `UserRepository`, `RoleRepository`, `MenuRepository` |
+| `repository.go` | Interface repository tiap modul |
 
 ### `internal/usecase/`
 
@@ -70,10 +72,12 @@ Aturan bisnis. Hanya bergantung pada `domain`.
 
 | File | Fungsi |
 | --- | --- |
-| `book.go` | Validasi buku, generate ID, pagination |
 | `user.go` | Validasi user, UUID, cek username/email unik |
 | `role.go` | Validasi role, soft delete (`deletedAt` / `deletedBy`) |
 | `menu.go` | Validasi menu, parent, `sortOrder`, soft delete |
+| `user_role.go` | Validasi penugasan user-role, `number` (NIM/NIP), pasangan unik |
+| `privilege.go` | Validasi privilege, `code` unik |
+| `role_privilege.go` | Validasi otorisasi role-menu-privilege, kombinasi unik |
 | `*_test.go` | Tes usecase memakai `adapter/memory` |
 
 ### `internal/adapter/http/`
@@ -83,10 +87,12 @@ Adapter inbound: terjemahkan HTTP menjadi pemanggilan usecase.
 | File | Fungsi |
 | --- | --- |
 | `router.go` | Daftar route dan middleware |
-| `book.go` | Handler CRUD `/api/v1/books` |
 | `user.go` | Handler CRUD `/api/v1/users` |
 | `role.go` | Handler CRUD `/api/v1/roles` |
 | `menu.go` | Handler CRUD `/api/v1/menus` |
+| `user_role.go` | Handler `/api/v1/user-roles` (create, list, get, delete) |
+| `privilege.go` | Handler CRUD `/api/v1/privileges` |
+| `role_privilege.go` | Handler `/api/v1/role-privileges` (create, list, get, delete) |
 | `health.go` | `GET /health`, ping database |
 | `response.go` | Format JSON sukses/error |
 | `middleware.go` | Recover panic, logging, CORS |
@@ -98,10 +104,12 @@ Adapter outbound: implementasi repository ke PostgreSQL.
 
 | File | Fungsi |
 | --- | --- |
-| `book.go` | SQL tabel `books` |
 | `user.go` | SQL tabel `users` |
 | `role.go` | SQL tabel `roles` (termasuk soft delete) |
 | `menu.go` | SQL tabel `menus` (parent + soft delete) |
+| `user_role.go` | SQL tabel `user_roles` |
+| `privilege.go` | SQL tabel `privileges` |
+| `role_privilege.go` | SQL tabel `role_privileges` |
 
 ### `internal/adapter/memory/`
 
@@ -109,10 +117,12 @@ Implementasi repository di memori. Dipakai tes, bukan production.
 
 | File | Fungsi |
 | --- | --- |
-| `book.go` | Store buku in-memory |
 | `user.go` | Store user in-memory |
 | `role.go` | Store role in-memory |
 | `menu.go` | Store menu in-memory |
+| `user_role.go` | Store user role in-memory |
+| `privilege.go` | Store privilege in-memory |
+| `role_privilege.go` | Store role privilege in-memory |
 
 ### `internal/infrastructure/config/`
 
@@ -133,11 +143,13 @@ Koneksi dan migrasi skema.
 | `migrate.go` | Jalankan file SQL yang belum tercatat |
 | `embed.go` | Embed folder `migrations/` ke binary |
 | `migrate_test.go` | Tes parsing nama file migrasi |
-| `migrations/000001_create_books.sql` | Tabel `books` |
 | `migrations/000002_create_users.sql` | Tabel `users` |
 | `migrations/000003_create_roles.sql` | Tabel `roles` |
 | `migrations/000004_create_menus.sql` | Tabel `menus` + enum `MenuType` |
 | `migrations/000005_recreate_menus.sql` | Recreate `menus` jika tabel sudah di-drop |
+| `migrations/000006_create_user_roles.sql` | Tabel `user_roles` (termasuk `number`) |
+| `migrations/000007_create_privileges.sql` | Tabel `privileges` |
+| `migrations/000008_create_role_privileges.sql` | Tabel `role_privileges` |
 
 Progress migrasi disimpan di tabel `schema_migrations` (`version`, `name`, `applied_at`).
 
@@ -148,8 +160,8 @@ Data awal. Tidak dipanggil saat server start.
 | File | Fungsi |
 | --- | --- |
 | `role.go` | Seed role default |
-| `book.go` | Seed buku contoh |
 | `menu.go` | Seed menu default (termasuk hierarki parent) |
+| `privilege.go` | Seed privilege default |
 | `*_test.go` | Tes seeder idempotent |
 
 Cara menjalankan: lihat [seeder.md](seeder.md).

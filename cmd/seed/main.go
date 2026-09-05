@@ -19,7 +19,7 @@ func main() {
 
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, "usage: go run ./cmd/seed <seeder>")
-		fmt.Fprintln(os.Stderr, "available: roles, books, menus")
+		fmt.Fprintln(os.Stderr, "available: roles, menus, privileges")
 		os.Exit(1)
 	}
 
@@ -44,13 +44,13 @@ func main() {
 	switch name {
 	case "roles":
 		err = seeder.Roles(ctx, usecase.NewRoleUseCase(postgres.NewRoleRepository(pool)))
-	case "books":
-		err = seeder.Books(ctx, usecase.NewBookUseCase(postgres.NewBookRepository(pool)))
 	case "menus":
 		err = seeder.Menus(ctx, usecase.NewMenuUseCase(postgres.NewMenuRepository(pool)))
+	case "privileges":
+		err = seeder.Privileges(ctx, usecase.NewPrivilegeUseCase(postgres.NewPrivilegeRepository(pool)))
 	default:
 		fmt.Fprintf(os.Stderr, "unknown seeder %q\n", name)
-		fmt.Fprintln(os.Stderr, "available: roles, books, menus")
+		fmt.Fprintln(os.Stderr, "available: roles, menus, privileges")
 		os.Exit(1)
 	}
 

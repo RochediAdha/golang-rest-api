@@ -1,0 +1,66 @@
+# User roles
+
+Penugasan role ke user. ID berupa UUID. Hapus bersifat permanen.
+
+Satu pasangan `userId` + `roleId` hanya boleh ada sekali. Jika user atau role dihapus fisik, baris terkait ikut terhapus (`ON DELETE CASCADE`). Role yang di-soft-delete tidak bisa ditugaskan.
+
+`number` dipakai sebagai identitas join (NIM mahasiswa / NIP dosen). Wajib untuk role `dosen`, `lecturer`, `mahasiswa`, atau `student`. Unik per role: satu NIM tidak boleh dipakai dua mahasiswa.
+
+## Object
+
+| Field | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | uuid | Diisi server |
+| `userId` | uuid | Wajib, harus merujuk user yang ada |
+| `roleId` | uuid | Wajib, harus merujuk role yang belum dihapus |
+| `number` | string | Opsional kecuali role dosen/mahasiswa; max 50; unik per role |
+| `createdAt` | datetime | Diisi server |
+| `createdBy` | uuid | Opsional |
+
+Tidak ada `updatedAt` dan tidak ada endpoint update. Ubah penugasan dengan hapus lalu create ulang.
+
+## `GET /api/v1/user-roles`
+
+Query: `userId`, `roleId`, `number`, `limit`, `offset`.
+
+`number` dipakai untuk mencari penugasan saat join, misalnya `GET /api/v1/user-roles?number=2301001`.
+
+```json
+{
+  "data": [
+    {
+      "id": "a1b2c3d4-e5f6-4789-abcd-1234567890ab",
+      "userId": "11111111-1111-4111-8111-111111111111",
+      "roleId": "22222222-2222-4222-8222-222222222222",
+      "number": "2301001",
+      "createdAt": "2026-09-05T08:00:00Z"
+    }
+  ],
+  "meta": { "total": 1, "limit": 20, "offset": 0 }
+}
+```
+
+## `GET /api/v1/user-roles/{id}`
+
+`id` harus UUID. Response `200` object user role. `400` / `404` jika tidak valid atau tidak ada.
+
+## `POST /api/v1/user-roles`
+
+```json
+{
+  "userId": "11111111-1111-4111-8111-111111111111",
+  "roleId": "22222222-2222-4222-8222-222222222222",
+  "number": "2301001",
+  "createdBy": "11111111-1111-4111-8111-111111111111"
+}
+```
+
+`createdBy` opsional. `number` wajib jika role adalah dosen/mahasiswa.
+
+Response `201` object user role.
+
+Error: `400 invalid_input`, `400 invalid_user`, `400 invalid_role`, `409 duplicate_user_role`, `409 duplicate_user_role_number`.
+
+## `DELETE /api/v1/user-roles/{id}`
+
+Hapus permanen. Response `204` tanpa body.
