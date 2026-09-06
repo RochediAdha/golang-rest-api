@@ -21,6 +21,10 @@ Project ini memakai Clean Architecture. Aturan bisnis tidak bergantung pada HTTP
 │       │   └── migrations/
 │       └── seeder/
 ├── Makefile
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
+├── .env.example
 ├── go.mod
 └── README.md
 ```
@@ -60,7 +64,7 @@ Lapisan terdalam: entitas, error, dan kontrak penyimpanan (port). Tidak tahu HTT
 | `user.go` | Entitas `User` dan input create/update |
 | `role.go` | Entitas `Role` dan input create/update/delete |
 | `menu.go` | Entitas `Menu` dan input create/update/delete |
-| `user_role.go` | Entitas `UserRole` dan input create |
+| `user_role.go` | Entitas `UserRole`, list (`UserRoleListItem`), show (`UserRoleView`) |
 | `privilege.go` | Entitas `Privilege` dan input create/update |
 | `role_privilege.go` | Entitas `RolePrivilege` dan input create |
 | `errors.go` | Error domain (`ErrNotFound`, `ErrInvalidInput`, duplikat, dll.) |
@@ -75,7 +79,7 @@ Aturan bisnis. Hanya bergantung pada `domain`.
 | `user.go` | Validasi user, UUID, cek username/email unik |
 | `role.go` | Validasi role, soft delete (`deletedAt` / `deletedBy`) |
 | `menu.go` | Validasi menu, parent, `sortOrder`, soft delete |
-| `user_role.go` | Validasi penugasan user-role, `number` (NIM/NIP), pasangan unik |
+| `user_role.go` | Validasi penugasan, `number` (NIM/NIP), list/show dengan nama user dan role |
 | `privilege.go` | Validasi privilege, `code` unik |
 | `role_privilege.go` | Validasi otorisasi role-menu-privilege, kombinasi unik |
 | `*_test.go` | Tes usecase memakai `adapter/memory` |
@@ -130,7 +134,7 @@ Membaca environment dan `.env`.
 
 | File | Fungsi |
 | --- | --- |
-| `config.go` | `ADDR`, DSN PostgreSQL, timeout, ukuran pool |
+| `config.go` | `ADDR`, `DB_*` (atau `DATABASE_URL`), timeout, ukuran pool |
 | `config_test.go` | Tes penyusunan DSN |
 
 ### `internal/infrastructure/database/`
@@ -171,8 +175,11 @@ Cara menjalankan: lihat [seeder.md](seeder.md).
 | File | Fungsi |
 | --- | --- |
 | `go.mod` / `go.sum` | Modul Go (`golang-rest-api`) dan dependency |
-| `Makefile` | `run`, `test`, `tidy`, `seed` |
-| `.env` / `.env.example` | Konfigurasi lokal (`.env` tidak di-commit) |
+| `Makefile` | `run`, `test`, `tidy`, `seed`, `docker-up`, `docker-down`, `docker-seed` |
+| `Dockerfile` | Multi-stage build binary `api` dan `seed` |
+| `docker-compose.yml` | Container API saja; Postgres di server terpisah |
+| `.dockerignore` | File yang tidak masuk image |
+| `.env` / `.env.example` | `DB_*` (`.env` tidak di-commit) |
 | `README.md` | Ringkasan cara jalan dan endpoint |
 
 ## Pemetaan singkat ke MVC

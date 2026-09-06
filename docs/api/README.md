@@ -4,6 +4,8 @@ Base URL default: `http://localhost:8080`
 
 Semua request/response body memakai `Content-Type: application/json`.
 
+`GET /` menampilkan daftar path modul. `GET /health` mem-ping database.
+
 | Modul | File |
 | --- | --- |
 | Health | [health.md](health.md) |

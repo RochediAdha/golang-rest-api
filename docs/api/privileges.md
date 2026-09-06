@@ -25,9 +25,9 @@ Query: `q` (code, nama, deskripsi), `limit`, `offset`.
   "data": [
     {
       "id": "a1b2c3d4-e5f6-4789-abcd-1234567890ab",
-      "code": "user.read",
-      "name": "Read User",
-      "description": "View user data",
+      "code": "VIEW",
+      "name": "View",
+      "description": "View data and details",
       "isActive": true,
       "createdAt": "2026-09-05T08:00:00Z",
       "updatedAt": "2026-09-05T08:00:00Z"
@@ -45,9 +45,9 @@ Query: `q` (code, nama, deskripsi), `limit`, `offset`.
 
 ```json
 {
-  "code": "user.read",
-  "name": "Read User",
-  "description": "View user data",
+  "code": "VIEW",
+  "name": "View",
+  "description": "View data and details",
   "isActive": true,
   "createdBy": "11111111-1111-4111-8111-111111111111"
 }
@@ -63,9 +63,9 @@ Error: `400 invalid_input`, `409 duplicate_privilege_code`.
 
 ```json
 {
-  "code": "user.read",
-  "name": "Read Users",
-  "description": "View users",
+  "code": "VIEW",
+  "name": "View",
+  "description": "View data and details",
   "isActive": false,
   "updatedBy": "11111111-1111-4111-8111-111111111111"
 }

@@ -9,7 +9,7 @@ Perintah: `go run ./cmd/api`
 Urutan di `cmd/api/main.go`:
 
 1. Logger JSON diaktifkan.
-2. Config dibaca dari environment dan file `.env` (`internal/infrastructure/config`).
+2. Config dibaca dari environment dan file `.env` (`DB_*`, atau `DATABASE_URL` jika diisi). Interpolasi `${VAR}` di `.env` tidak di-expand.
 3. Connection pool PostgreSQL dibuka (`database.Open`). Kalau gagal, proses berhenti.
 4. Migrasi dijalankan (`database.Migrate`). File SQL yang belum ada di `schema_migrations` dieksekusi, lalu dicatat.
 5. Repository PostgreSQL dibuat, lalu diikat ke usecase:
@@ -74,7 +74,7 @@ Semua modul CRUD mengikuti pola yang sama. Perbedaan ada di aturan bisnis.
 | Users | `/api/v1/users` | ID UUID; username dan email unik |
 | Roles | `/api/v1/roles` | ID UUID; nama unik; delete adalah soft delete |
 | Menus | `/api/v1/menus` | ID UUID; `code` unik; `parentId` opsional; delete adalah soft delete |
-| User roles | `/api/v1/user-roles` | ID UUID; pasangan `userId`+`roleId` unik; list menampilkan nama user/role; show menampilkan semua role per user; delete permanen |
+| User roles | `/api/v1/user-roles` | ID UUID; pasangan `userId`+`roleId` unik; list menampilkan nama user/role, deskripsi, dan `number`; show menampilkan semua role per user; delete permanen |
 | Privileges | `/api/v1/privileges` | ID UUID; `code` unik; delete permanen |
 | Role privileges | `/api/v1/role-privileges` | ID UUID; kombinasi role+menu+privilege unik; delete permanen |
 
@@ -124,3 +124,7 @@ go test ./...
 ```
 
 Tes HTTP dan usecase memakai `adapter/memory`, jadi tidak butuh PostgreSQL. Tes migrasi hanya memeriksa parsing file SQL, tidak menulis ke database.
+
+## 7. Deploy
+
+Di server, proses start sama (`cmd/api` → migrasi → listen). Perbedaannya hanya cara menjalankan proses: Docker Compose atau systemd. Lihat [deploy.md](deploy.md).

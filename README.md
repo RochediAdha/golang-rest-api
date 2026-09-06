@@ -7,12 +7,14 @@ Dokumentasi lengkap ada di folder [`docs/`](docs/README.md):
 - [Struktur folder](docs/struktur-folder.md)
 - [Alur aplikasi](docs/alur-aplikasi.md)
 - [Seeder](docs/seeder.md)
+- [Deploy di server](docs/deploy.md)
 - [Spec API](docs/api/README.md)
 
 ## Struktur
 
 ```
 cmd/api                         # composition root: wiring config, DB, usecase, HTTP
+cmd/seed                        # seeder manual (roles, menus, privileges)
 internal/
   domain/                       # entitas, error, dan port repository
   usecase/                      # aturan bisnis
@@ -30,17 +32,27 @@ Request mengalir: `adapter/http` → `usecase` → `adapter/postgres` → Postgr
 
 ## Database
 
-API memakai PostgreSQL lokal. Salin konfigurasi lalu sesuaikan user, password, dan nama database:
+API memakai PostgreSQL (lokal atau server terpisah). Salin konfigurasi lalu sesuaikan host, user, password, dan nama database:
 
 ```bash
 cp .env.example .env
 ```
 
-Default DSN:
+Variabel yang dibaca aplikasi:
 
 ```
-postgres://postgres:postgres@localhost:5432/golang_rest_api?sslmode=disable
+ADDR=:8080
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=golang_rest_api
+DB_SSLMODE=disable
+DB_MAX_CONNS=10
+DB_MIN_CONNS=1
 ```
+
+File `.env` tidak men-expand `${VAR}`; tulis nilainya langsung. `DATABASE_URL` opsional: jika diisi, mengalahkan `DB_*`.
 
 Saat server start, migrasi dijalankan dan dicatat di tabel `schema_migrations` (`version`, `name`, `applied_at`). File SQL ada di `internal/infrastructure/database/migrations/`. Migrasi yang sudah tercatat tidak dijalankan ulang.
 
@@ -51,6 +63,17 @@ go run ./cmd/api
 ```
 
 Server default: `http://localhost:8080`
+
+## Docker
+
+Image hanya berisi API. PostgreSQL di server terpisah; isi `DB_HOST` (bukan `localhost` jika DB di mesin lain).
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+```
+
+Health: `http://127.0.0.1:8080/health`. Panduan server: [docs/deploy.md](docs/deploy.md).
 
 ## Seeder
 
@@ -69,6 +92,7 @@ atau `make seed name=roles`. Data yang sudah ada dilewati (tidak diduplikasi).
 # Health
 | Method | Path | Deskripsi |
 | --- | --- | --- |
+| `GET` | `/` | Informasi singkat API |
 | `GET` | `/health` | Health check (termasuk ping database) |
 
 # Users
@@ -101,8 +125,8 @@ atau `make seed name=roles`. Data yang sudah ada dilewati (tidak diduplikasi).
 # User roles
 | Method | Path | Deskripsi |
 | --- | --- | --- |
-| `GET` | `/api/v1/user-roles` | Daftar penugasan (`userId`, `roleId`, `number`, `limit`, `offset`) |
-| `GET` | `/api/v1/user-roles/{id}` | Detail user beserta semua role-nya |
+| `GET` | `/api/v1/user-roles` | Daftar penugasan (nama user/role, `number`; filter `userId`, `roleId`, `number`) |
+| `GET` | `/api/v1/user-roles/{id}` | Detail user beserta semua role-nya (`{id}` = userId atau assignment id) |
 | `POST` | `/api/v1/user-roles` | Tugaskan role ke user |
 | `DELETE` | `/api/v1/user-roles/{id}` | Hapus penugasan |
 

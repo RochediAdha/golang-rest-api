@@ -40,7 +40,10 @@ Informasi singkat API.
     "health": "GET /health",
     "users": "GET /api/v1/users",
     "roles": "GET /api/v1/roles",
-    "menus": "GET /api/v1/menus"
+    "menus": "GET /api/v1/menus",
+    "userRoles": "GET /api/v1/user-roles",
+    "privileges": "GET /api/v1/privileges",
+    "rolePrivileges": "GET /api/v1/role-privileges"
   }
 }
 ```
