@@ -80,11 +80,45 @@ func TestUserRoleAPI(t *testing.T) {
 	if len(roles) != 2 {
 		t.Fatalf("expected 2 roles, got %s", getRec.Body.String())
 	}
+	foundStudentNumber := false
+	for _, item := range roles {
+		role, _ := item.(map[string]any)
+		if _, ok := role["number"]; !ok {
+			t.Fatalf("show role missing number: %s", getRec.Body.String())
+		}
+		if role["name"] == "mahasiswa" && role["number"] == "2301001" {
+			foundStudentNumber = true
+		}
+	}
+	if !foundStudentNumber {
+		t.Fatalf("expected mahasiswa number in show: %s", getRec.Body.String())
+	}
 
 	listRec := httptest.NewRecorder()
 	handler.ServeHTTP(listRec, httptest.NewRequest(http.MethodGet, "/api/v1/user-roles?userId="+userID, nil))
 	if listRec.Code != http.StatusOK {
 		t.Fatalf("list status = %d", listRec.Code)
+	}
+	var listed struct {
+		Data []map[string]any `json:"data"`
+	}
+	if err := json.Unmarshal(listRec.Body.Bytes(), &listed); err != nil {
+		t.Fatalf("decode list: %v", err)
+	}
+	if len(listed.Data) == 0 || listed.Data[0]["userName"] != "Rochedi" || listed.Data[0]["roleName"] == nil {
+		t.Fatalf("unexpected list body: %s", listRec.Body.String())
+	}
+	foundListNumber := false
+	for _, row := range listed.Data {
+		if _, ok := row["number"]; !ok {
+			t.Fatalf("list row missing number: %s", listRec.Body.String())
+		}
+		if row["roleName"] == "mahasiswa" && row["number"] == "2301001" {
+			foundListNumber = true
+		}
+	}
+	if !foundListNumber {
+		t.Fatalf("expected mahasiswa number in list: %s", listRec.Body.String())
 	}
 
 	dupReq := httptest.NewRequest(http.MethodPost, "/api/v1/user-roles", strings.NewReader(fmt.Sprintf(`{"userId":%q,"roleId":%q}`, userID, roleID)))

@@ -74,7 +74,7 @@ Semua modul CRUD mengikuti pola yang sama. Perbedaan ada di aturan bisnis.
 | Users | `/api/v1/users` | ID UUID; username dan email unik |
 | Roles | `/api/v1/roles` | ID UUID; nama unik; delete adalah soft delete |
 | Menus | `/api/v1/menus` | ID UUID; `code` unik; `parentId` opsional; delete adalah soft delete |
-| User roles | `/api/v1/user-roles` | ID UUID; pasangan `userId`+`roleId` unik; show menampilkan semua role per user; `number` untuk join dosen/mahasiswa; delete permanen |
+| User roles | `/api/v1/user-roles` | ID UUID; pasangan `userId`+`roleId` unik; list menampilkan nama user/role; show menampilkan semua role per user; delete permanen |
 | Privileges | `/api/v1/privileges` | ID UUID; `code` unik; delete permanen |
 | Role privileges | `/api/v1/role-privileges` | ID UUID; kombinasi role+menu+privilege unik; delete permanen |
 

@@ -27,7 +27,7 @@ func TestUserRoleUseCaseCRUD(t *testing.T) {
 		t.Fatalf("create role: %v", err)
 	}
 
-	created, err := uc.Create(ctx, domain.CreateUserRoleInput{UserID: user.ID, RoleID: role.ID})
+	created, err := uc.Create(ctx, domain.CreateUserRoleInput{UserID: user.ID, RoleID: role.ID, CreatedBy: &user.ID})
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -65,6 +65,15 @@ func TestUserRoleUseCaseCRUD(t *testing.T) {
 	if len(got.Roles) != 2 {
 		t.Fatalf("expected 2 roles, got %d", len(got.Roles))
 	}
+	foundShowNumber := false
+	for _, item := range got.Roles {
+		if item.RoleID == student.ID && item.Number == "2301001" {
+			foundShowNumber = true
+		}
+	}
+	if !foundShowNumber {
+		t.Fatalf("expected mahasiswa number in show, got %+v", got.Roles)
+	}
 
 	list, total, err := uc.List(ctx, domain.UserRoleListFilter{Number: "2301001", Limit: 10})
 	if err != nil {
@@ -72,6 +81,26 @@ func TestUserRoleUseCaseCRUD(t *testing.T) {
 	}
 	if total != 1 || len(list) != 1 {
 		t.Fatalf("list want 1 got total=%d len=%d", total, len(list))
+	}
+	if list[0].UserName != "Rochedi" || list[0].RoleName != "mahasiswa" || list[0].Number != "2301001" {
+		t.Fatalf("unexpected list item: %+v", list[0])
+	}
+
+	all, _, err := uc.List(ctx, domain.UserRoleListFilter{UserID: user.ID, Limit: 10})
+	if err != nil {
+		t.Fatalf("list all: %v", err)
+	}
+	foundCreatedBy := false
+	for _, row := range all {
+		if row.RoleID == role.ID {
+			if row.CreatedBy == nil || row.CreatedBy.ID != user.ID || row.CreatedBy.Name != "Rochedi" {
+				t.Fatalf("expected createdBy name, got %+v", row.CreatedBy)
+			}
+			foundCreatedBy = true
+		}
+	}
+	if !foundCreatedBy {
+		t.Fatal("admin assignment missing from list")
 	}
 
 	if err := uc.Delete(ctx, created.ID); err != nil {

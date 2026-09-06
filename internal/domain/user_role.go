@@ -30,7 +30,7 @@ type UserRoleItem struct {
 	ID        string    `json:"id"`
 	RoleID    string    `json:"roleId"`
 	Name      string    `json:"name"`
-	Number    string    `json:"number,omitempty"`
+	Number    string    `json:"number"`
 	CreatedAt time.Time `json:"createdAt"`
 	CreatedBy *string   `json:"createdBy,omitempty"`
 }
@@ -40,4 +40,21 @@ type UserRoleView struct {
 	UserID string         `json:"userId"`
 	Name   string         `json:"name"`
 	Roles  []UserRoleItem `json:"roles"`
+}
+
+type ActorRef struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type UserRoleListItem struct {
+	ID              string    `json:"id"`
+	UserID          string    `json:"userId"`
+	UserName        string    `json:"userName"`
+	RoleID          string    `json:"roleId"`
+	RoleName        string    `json:"roleName"`
+	RoleDescription string    `json:"roleDescription,omitempty"`
+	Number          string    `json:"number"`
+	CreatedAt       time.Time `json:"createdAt"`
+	CreatedBy       *ActorRef `json:"createdBy,omitempty"`
 }

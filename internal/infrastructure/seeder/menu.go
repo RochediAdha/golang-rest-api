@@ -25,12 +25,13 @@ type menuSeed struct {
 var defaultMenus = []menuSeed{
 	{Code: "dashboard", Name: "Dashboard", Path: "/dashboard", Icon: "home", Description: "Halaman utama", SortOrder: 1, Type: domain.MenuTypeItem},
 	{Code: "master", Name: "Master Data", Path: "/master", Icon: "folder", Description: "Data referensi", SortOrder: 2, Type: domain.MenuTypeGroup},
+	
 	{Code: "user-management", Name: "User Management", Path: "/user-management", Icon: "users", Description: "Manajemen user", SortOrder: 98, Type: domain.MenuTypeGroup},
+	{ParentCode: "user-management", Code: "users", Name: "Users", Path: "/master/users", Icon: "users", Description: "Manajemen user", SortOrder: 1, Type: domain.MenuTypeItem},
+	{ParentCode: "user-management", Code: "roles", Name: "Roles", Path: "/master/roles", Icon: "shield", Description: "Manajemen role", SortOrder: 2, Type: domain.MenuTypeItem},
+	{ParentCode: "user-management", Code: "permission", Name: "Permission", Path: "/master/permission", Icon: "shield", Description: "Manajemen permission", SortOrder: 3, Type: domain.MenuTypeItem},
+	
 	{Code: "system", Name: "System", Path: "/system", Icon: "cog", Description: "Pengaturan sistem", SortOrder: 99, Type: domain.MenuTypeGroup},
-
-	{ParentCode: "master", Code: "users", Name: "Users", Path: "/master/users", Icon: "users", Description: "Manajemen user", SortOrder: 1, Type: domain.MenuTypeItem},
-	{ParentCode: "master", Code: "roles", Name: "Roles", Path: "/master/roles", Icon: "shield", Description: "Manajemen role", SortOrder: 2, Type: domain.MenuTypeItem},
-
 	{ParentCode: "system", Code: "menus", Name: "Menus", Path: "/menus", Icon: "menu", Description: "Manajemen menu", SortOrder: 1, Type: domain.MenuTypeItem},
 }
 

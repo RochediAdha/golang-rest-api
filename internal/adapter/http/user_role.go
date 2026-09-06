@@ -39,14 +39,14 @@ func (h *UserRoleHandler) list(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if items == nil {
-		items = []domain.UserRole{}
+		items = []domain.UserRoleListItem{}
 	}
 
 	if limit <= 0 {
 		limit = 20
 	}
 
-	writeJSON(w, http.StatusOK, listResponse[domain.UserRole]{
+	writeJSON(w, http.StatusOK, listResponse[domain.UserRoleListItem]{
 		Data: items,
 		Meta: listMeta{Total: total, Limit: limit, Offset: offset},
 	})

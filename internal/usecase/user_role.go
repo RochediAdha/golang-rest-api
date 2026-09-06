@@ -124,7 +124,7 @@ func (s *UserRoleUseCase) viewByUser(ctx context.Context, user domain.User) (dom
 	}, nil
 }
 
-func (s *UserRoleUseCase) List(ctx context.Context, filter domain.UserRoleListFilter) ([]domain.UserRole, int, error) {
+func (s *UserRoleUseCase) List(ctx context.Context, filter domain.UserRoleListFilter) ([]domain.UserRoleListItem, int, error) {
 	if filter.Limit <= 0 {
 		filter.Limit = defaultLimit
 	}
@@ -145,7 +145,53 @@ func (s *UserRoleUseCase) List(ctx context.Context, filter domain.UserRoleListFi
 		return nil, 0, domain.ErrInvalidInput
 	}
 
-	return s.repo.List(ctx, filter)
+	items, total, err := s.repo.List(ctx, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	result := make([]domain.UserRoleListItem, 0, len(items))
+	for _, item := range items {
+		row, err := s.toListItem(ctx, item)
+		if err != nil {
+			if err == domain.ErrNotFound {
+				continue
+			}
+			return nil, 0, err
+		}
+		result = append(result, row)
+	}
+	return result, total, nil
+}
+
+func (s *UserRoleUseCase) toListItem(ctx context.Context, item domain.UserRole) (domain.UserRoleListItem, error) {
+	user, err := s.users.GetByID(ctx, item.UserID)
+	if err != nil {
+		return domain.UserRoleListItem{}, err
+	}
+	role, err := s.roles.GetByID(ctx, item.RoleID)
+	if err != nil {
+		return domain.UserRoleListItem{}, err
+	}
+
+	row := domain.UserRoleListItem{
+		ID:              item.ID,
+		UserID:          item.UserID,
+		UserName:        user.Name,
+		RoleID:          item.RoleID,
+		RoleName:        role.Name,
+		RoleDescription: role.Description,
+		Number:          item.Number,
+		CreatedAt:       item.CreatedAt,
+	}
+	if item.CreatedBy != nil {
+		actor := domain.ActorRef{ID: *item.CreatedBy}
+		if creator, err := s.users.GetByID(ctx, *item.CreatedBy); err == nil {
+			actor.Name = creator.Name
+		}
+		row.CreatedBy = &actor
+	}
+	return row, nil
 }
 
 func (s *UserRoleUseCase) Delete(ctx context.Context, id string) error {

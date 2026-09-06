@@ -6,7 +6,7 @@ Satu pasangan `userId` + `roleId` hanya boleh ada sekali. Jika user atau role di
 
 `number` dipakai sebagai identitas join (NIM mahasiswa / NIP dosen). Wajib untuk role `dosen`, `lecturer`, `mahasiswa`, atau `student`. Unik per role: satu NIM tidak boleh dipakai dua mahasiswa.
 
-## Object create / list
+## Object create
 
 | Field | Tipe | Keterangan |
 | --- | --- | --- |
@@ -18,6 +18,22 @@ Satu pasangan `userId` + `roleId` hanya boleh ada sekali. Jika user atau role di
 | `createdBy` | uuid | Opsional |
 
 Tidak ada `updatedAt` dan tidak ada endpoint update. Ubah penugasan dengan hapus lalu create ulang.
+
+## Object list
+
+`GET /api/v1/user-roles` menampilkan tiap penugasan beserta nama user, nama/deskripsi role, `number`, dan nama pembuat.
+
+| Field | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | uuid | ID penugasan |
+| `userId` | uuid | ID user |
+| `userName` | string | Nama user |
+| `roleId` | uuid | ID role |
+| `roleName` | string | Nama role |
+| `roleDescription` | string | Deskripsi role |
+| `number` | string | NIM/NIP; string kosong jika tidak diisi |
+| `createdAt` | datetime | Waktu penugasan |
+| `createdBy` | object | `{ "id", "name" }` jika `createdBy` diisi |
 
 ## Object show
 
@@ -37,7 +53,7 @@ Tiap item `roles`:
 | `id` | uuid | ID penugasan (untuk delete) |
 | `roleId` | uuid | ID role |
 | `name` | string | Nama role |
-| `number` | string | NIM/NIP jika ada |
+| `number` | string | NIM/NIP; string kosong jika tidak diisi |
 | `createdAt` | datetime | Waktu penugasan |
 | `createdBy` | uuid | Opsional |
 
@@ -53,9 +69,16 @@ Query: `userId`, `roleId`, `number`, `limit`, `offset`.
     {
       "id": "a1b2c3d4-e5f6-4789-abcd-1234567890ab",
       "userId": "11111111-1111-4111-8111-111111111111",
+      "userName": "Rochedi Adha",
       "roleId": "22222222-2222-4222-8222-222222222222",
+      "roleName": "mahasiswa",
+      "roleDescription": "Limited read-only access",
       "number": "2301001",
-      "createdAt": "2026-09-05T08:00:00Z"
+      "createdAt": "2026-09-05T08:00:00Z",
+      "createdBy": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "name": "Rochedi Adha"
+      }
     }
   ],
   "meta": { "total": 1, "limit": 20, "offset": 0 }
@@ -76,6 +99,7 @@ Query: `userId`, `roleId`, `number`, `limit`, `offset`.
       "id": "a1b2c3d4-e5f6-4789-abcd-1234567890ab",
       "roleId": "22222222-2222-4222-8222-222222222222",
       "name": "admin",
+      "number": "",
       "createdAt": "2026-09-05T08:00:00Z"
     },
     {
