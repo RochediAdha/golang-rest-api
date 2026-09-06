@@ -65,9 +65,20 @@ func TestUserRoleAPI(t *testing.T) {
 	}
 
 	getRec := httptest.NewRecorder()
-	handler.ServeHTTP(getRec, httptest.NewRequest(http.MethodGet, "/api/v1/user-roles/"+id, nil))
+	handler.ServeHTTP(getRec, httptest.NewRequest(http.MethodGet, "/api/v1/user-roles/"+userID, nil))
 	if getRec.Code != http.StatusOK {
-		t.Fatalf("get status = %d", getRec.Code)
+		t.Fatalf("get status = %d body=%s", getRec.Code, getRec.Body.String())
+	}
+	var shown map[string]any
+	if err := json.Unmarshal(getRec.Body.Bytes(), &shown); err != nil {
+		t.Fatalf("decode get: %v", err)
+	}
+	if shown["id"] != userID || shown["userId"] != userID || shown["name"] != "Rochedi" {
+		t.Fatalf("unexpected show body: %s", getRec.Body.String())
+	}
+	roles, _ := shown["roles"].([]any)
+	if len(roles) != 2 {
+		t.Fatalf("expected 2 roles, got %s", getRec.Body.String())
 	}
 
 	listRec := httptest.NewRecorder()

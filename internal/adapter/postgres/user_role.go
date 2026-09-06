@@ -56,6 +56,32 @@ func (s *UserRoleRepository) GetByRoleAndNumber(ctx context.Context, roleID, num
 	`, roleID, number))
 }
 
+func (s *UserRoleRepository) ListByUserID(ctx context.Context, userID string) ([]domain.UserRole, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT id, "userId", "roleId", number, "createdAt", "createdBy"
+		FROM user_roles
+		WHERE "userId" = $1
+		ORDER BY "createdAt" DESC
+	`, userID)
+	if err != nil {
+		return nil, fmt.Errorf("list user roles by user: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]domain.UserRole, 0)
+	for rows.Next() {
+		item, err := scanUserRole(rows)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("list user roles by user: %w", err)
+	}
+	return items, nil
+}
+
 func (s *UserRoleRepository) List(ctx context.Context, filter domain.UserRoleListFilter) ([]domain.UserRole, int, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT id, "userId", "roleId", number, "createdAt", "createdBy", COUNT(*) OVER() AS total

@@ -24,6 +24,7 @@ type UserRoleRepository interface {
 	GetByID(ctx context.Context, id string) (UserRole, error)
 	GetByUserAndRole(ctx context.Context, userID, roleID string) (UserRole, error)
 	GetByRoleAndNumber(ctx context.Context, roleID, number string) (UserRole, error)
+	ListByUserID(ctx context.Context, userID string) ([]UserRole, error)
 	List(ctx context.Context, filter UserRoleListFilter) ([]UserRole, int, error)
 	Delete(ctx context.Context, id string) error
 }

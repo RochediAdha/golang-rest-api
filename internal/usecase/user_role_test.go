@@ -35,12 +35,15 @@ func TestUserRoleUseCaseCRUD(t *testing.T) {
 		t.Fatalf("unexpected created user role: %+v", created)
 	}
 
-	got, err := uc.Get(ctx, created.ID)
+	got, err := uc.Get(ctx, user.ID)
 	if err != nil {
 		t.Fatalf("get: %v", err)
 	}
-	if got.ID != created.ID {
-		t.Fatalf("get mismatch: %+v", got)
+	if got.ID != user.ID || got.UserID != user.ID || got.Name != "Rochedi" || len(got.Roles) != 1 {
+		t.Fatalf("unexpected get: %+v", got)
+	}
+	if got.Roles[0].RoleID != role.ID || got.Roles[0].Name != "admin" {
+		t.Fatalf("unexpected role: %+v", got.Roles[0])
 	}
 
 	student, err := roleUC.Create(ctx, domain.CreateRoleInput{Name: "mahasiswa"})
@@ -55,6 +58,14 @@ func TestUserRoleUseCaseCRUD(t *testing.T) {
 		t.Fatalf("expected trimmed number, got %q", assigned.Number)
 	}
 
+	got, err = uc.Get(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("get after second role: %v", err)
+	}
+	if len(got.Roles) != 2 {
+		t.Fatalf("expected 2 roles, got %d", len(got.Roles))
+	}
+
 	list, total, err := uc.List(ctx, domain.UserRoleListFilter{Number: "2301001", Limit: 10})
 	if err != nil {
 		t.Fatalf("list: %v", err)
@@ -67,7 +78,15 @@ func TestUserRoleUseCaseCRUD(t *testing.T) {
 		t.Fatalf("delete: %v", err)
 	}
 	if _, err := uc.Get(ctx, created.ID); err != domain.ErrNotFound {
-		t.Fatalf("expected not found after delete, got %v", err)
+		t.Fatalf("expected not found after assignment delete, got %v", err)
+	}
+
+	remaining, err := uc.Get(ctx, user.ID)
+	if err != nil {
+		t.Fatalf("get remaining: %v", err)
+	}
+	if len(remaining.Roles) != 1 || remaining.Roles[0].RoleID != student.ID {
+		t.Fatalf("unexpected remaining roles: %+v", remaining.Roles)
 	}
 }
 

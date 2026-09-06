@@ -25,3 +25,19 @@ type UserRoleListFilter struct {
 	Limit  int
 	Offset int
 }
+
+type UserRoleItem struct {
+	ID        string    `json:"id"`
+	RoleID    string    `json:"roleId"`
+	Name      string    `json:"name"`
+	Number    string    `json:"number,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
+	CreatedBy *string   `json:"createdBy,omitempty"`
+}
+
+type UserRoleView struct {
+	ID     string         `json:"id"`
+	UserID string         `json:"userId"`
+	Name   string         `json:"name"`
+	Roles  []UserRoleItem `json:"roles"`
+}

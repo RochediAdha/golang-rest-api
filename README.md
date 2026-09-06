@@ -102,7 +102,7 @@ atau `make seed name=roles`. Data yang sudah ada dilewati (tidak diduplikasi).
 | Method | Path | Deskripsi |
 | --- | --- | --- |
 | `GET` | `/api/v1/user-roles` | Daftar penugasan (`userId`, `roleId`, `number`, `limit`, `offset`) |
-| `GET` | `/api/v1/user-roles/{id}` | Detail penugasan |
+| `GET` | `/api/v1/user-roles/{id}` | Detail user beserta semua role-nya |
 | `POST` | `/api/v1/user-roles` | Tugaskan role ke user |
 | `DELETE` | `/api/v1/user-roles/{id}` | Hapus penugasan |
 

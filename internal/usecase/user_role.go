@@ -60,12 +60,68 @@ func (s *UserRoleUseCase) Create(ctx context.Context, input domain.CreateUserRol
 	})
 }
 
-func (s *UserRoleUseCase) Get(ctx context.Context, id string) (domain.UserRole, error) {
+func (s *UserRoleUseCase) Get(ctx context.Context, id string) (domain.UserRoleView, error) {
 	id = strings.TrimSpace(id)
 	if !isUUID(id) {
-		return domain.UserRole{}, domain.ErrInvalidInput
+		return domain.UserRoleView{}, domain.ErrInvalidInput
 	}
-	return s.repo.GetByID(ctx, id)
+
+	user, err := s.users.GetByID(ctx, id)
+	if err == nil {
+		return s.viewByUser(ctx, user)
+	}
+	if err != domain.ErrNotFound {
+		return domain.UserRoleView{}, err
+	}
+
+	assignment, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return domain.UserRoleView{}, err
+	}
+	user, err = s.users.GetByID(ctx, assignment.UserID)
+	if err != nil {
+		return domain.UserRoleView{}, err
+	}
+	return s.viewByUser(ctx, user)
+}
+
+func (s *UserRoleUseCase) viewByUser(ctx context.Context, user domain.User) (domain.UserRoleView, error) {
+	items, err := s.repo.ListByUserID(ctx, user.ID)
+	if err != nil {
+		return domain.UserRoleView{}, err
+	}
+	if len(items) == 0 {
+		return domain.UserRoleView{}, domain.ErrNotFound
+	}
+
+	roles := make([]domain.UserRoleItem, 0, len(items))
+	for _, item := range items {
+		role, err := s.roles.GetByID(ctx, item.RoleID)
+		if err != nil {
+			if err == domain.ErrNotFound {
+				continue
+			}
+			return domain.UserRoleView{}, err
+		}
+		roles = append(roles, domain.UserRoleItem{
+			ID:        item.ID,
+			RoleID:    item.RoleID,
+			Name:      role.Name,
+			Number:    item.Number,
+			CreatedAt: item.CreatedAt,
+			CreatedBy: item.CreatedBy,
+		})
+	}
+	if len(roles) == 0 {
+		return domain.UserRoleView{}, domain.ErrNotFound
+	}
+
+	return domain.UserRoleView{
+		ID:     user.ID,
+		UserID: user.ID,
+		Name:   user.Name,
+		Roles:  roles,
+	}, nil
 }
 
 func (s *UserRoleUseCase) List(ctx context.Context, filter domain.UserRoleListFilter) ([]domain.UserRole, int, error) {

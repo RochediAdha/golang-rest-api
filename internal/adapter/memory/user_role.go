@@ -71,6 +71,22 @@ func (s *UserRoleRepository) GetByRoleAndNumber(_ context.Context, roleID, numbe
 	return domain.UserRole{}, domain.ErrNotFound
 }
 
+func (s *UserRoleRepository) ListByUserID(_ context.Context, userID string) ([]domain.UserRole, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	matched := make([]domain.UserRole, 0)
+	for _, item := range s.items {
+		if item.UserID == userID {
+			matched = append(matched, item)
+		}
+	}
+	sort.Slice(matched, func(i, j int) bool {
+		return matched[i].CreatedAt.After(matched[j].CreatedAt)
+	})
+	return matched, nil
+}
+
 func (s *UserRoleRepository) List(_ context.Context, filter domain.UserRoleListFilter) ([]domain.UserRole, int, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
